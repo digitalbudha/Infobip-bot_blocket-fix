@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -133,7 +133,7 @@ func GETConversations() {
 }
 
 func GETConversationsMessages(id string) {
-	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id + "/messages?limit=1"
+	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id + "/messages?limit=50"
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -164,10 +164,15 @@ func GETConversationsMessages(id string) {
 		return
 	}
 
+	var lastMessage Message
 	for _, msg := range data.Messages {
-		if msg.SingleSendMessage.Content.Type == "BOT_BLOCKED" {
-			AddConversationTag(id)
+		if msg.CreatedAt.After(lastMessage.CreatedAt) {
+			lastMessage = msg
 		}
+	}
+	
+	if lastMessage.SingleSendMessage.Content.Type == "BOT_BLOCKED" {
+		AddConversationTag(id)
 	}
 }
 
