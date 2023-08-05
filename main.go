@@ -1,65 +1,113 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
+	"bytes"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
 	"os"
 	"strconv"
-<<<<<<< HEAD
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
-=======
-	"strings"
->>>>>>> fdfc0ad737b8413bd91d13335b59fbd93680ced1
 )
 
-var roman = map[string]int{
-	"I":    1,
-	"II":   2,
-	"III":  3,
-	"IV":   4,
-	"V":    5,
-	"VI":   6,
-	"VII":  7,
-	"VIII": 8,
-	"IX":   9,
-	"X":    10,
-	"XL":   40,
-	"L":    50,
-	"XC":   90,
-	"C":    100,
+var GlobalKey string = ""
+var GlobalAgentId string = ""
+var GlobalTag string = ""
+var GlobalInterval string = ""
+
+type Conversation struct {
+	ID           string     `json:"id"`
+	Topic        string     `json:"topic"`
+	Summary      string     `json:"summary"`
+	Status       string     `json:"status"`
+	Priority     string     `json:"priority"`
+	QueueID      string     `json:"queueId"`
+	AgentID      string     `json:"agentId"`
+	CreatedAt    time.Time  `json:"createdAt"`
+	UpdatedAt    time.Time  `json:"updatedAt"`
+	ClosedAt     *time.Time `json:"closedAt,omitempty"`
+	PendingSince time.Time  `json:"pendingSince"`
+	FormID       string     `json:"formId"`
 }
 
-func readInputFromConsole() interface{} {
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("Введите ваше выражение: ")
-	scanner.Scan()
-	input := scanner.Text()
-	substrings := strings.Split(input, " ")
-	if numberOne, err := strconv.Atoi(substrings[0]); err == nil {
-		if numberTwo, err := strconv.Atoi(substrings[2]); err == nil {
-			switch substrings[1] {
-			case "+":
-				return numberOne + numberTwo
-			case "-":
-				return numberOne - numberTwo
-			case "*":
-				return numberOne * numberTwo
-			case "/":
-				if numberTwo == 0 {
-					fmt.Println("Сорьки, на ноль не умею делить")
-					return 0
-				}
-				return numberOne / numberTwo
-			default:
-				return "Не понял что за оператор для расчёта"
-			}
-		}
-		return "Второе число ты ввел не арабскими цифрами, сори пока"
+type Pagination struct {
+	TotalItems int    `json:"totalItems"`
+	Page       int    `json:"page"`
+	Limit      int    `json:"limit"`
+	OrderBy    string `json:"orderBy"`
+}
+
+type Data struct {
+	Conversations []Conversation `json:"conversations"`
+	Pagination    Pagination     `json:"pagination"`
+}
+
+type Content struct {
+	Text           string      `json:"text"`
+	ShowUrlPreview interface{} `json:"showUrlPreview"`
+}
+
+type ContentType struct {
+	Type string `json:"type"`
+}
+
+type SingleSendMessage struct {
+	From struct {
+		BotId string `json:"botId"`
+		Type  string `json:"type"`
+	} `json:"from"`
+	To struct {
+		ChatId string `json:"chatId"`
+		Type   string `json:"type"`
+	} `json:"to"`
+	Content     ContentType `json:"content"`
+	ParseMode   interface{} `json:"parseMode"`
+	ReplyMarkup interface{} `json:"replyMarkup"`
+	Channel     string      `json:"channel"`
+	Direction   string      `json:"direction"`
+}
+
+type Message struct {
+	ID                string            `json:"id"`
+	Channel           string            `json:"channel"`
+	From              string            `json:"from"`
+	To                string            `json:"to"`
+	Direction         string            `json:"direction"`
+	ConversationID    string            `json:"conversationId"`
+	CreatedAt         time.Time         `json:"createdAt"`
+	UpdatedAt         time.Time         `json:"updatedAt"`
+	Content           Content           `json:"content"`
+	SingleSendMessage SingleSendMessage `json:"singleSendMessage"`
+	ContentType       string            `json:"contentType"`
+}
+
+type ConversationData struct {
+	Messages   []Message  `json:"messages"`
+	Pagination Pagination `json:"pagination"`
+}
+
+type RequestTag struct {
+	TagName string `json:"tagName"`
+}
+
+type RequestCancelConversation struct {
+	Status  string `json:"status"`
+	AgentID string `json:"agentId"`
+}
+
+func GETConversations() {
+	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations?status=OPEN&limit=999"
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		log.Println(err)
 	}
-<<<<<<< HEAD
 	req.Header.Add("Authorization", GlobalKey)
 
 	res, err := client.Do(req)
@@ -77,7 +125,7 @@ func readInputFromConsole() interface{} {
 	var data Data
 	err = json.Unmarshal([]byte(body), &data)
 	if err != nil {
-	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
+		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Ошибка демаршалирования: ", err)
 	}
 
 	for _, conv := range data.Conversations {
@@ -113,7 +161,7 @@ func GETConversationsMessages(id string) {
 	var data ConversationData
 	err = json.Unmarshal([]byte(body), &data)
 	if err != nil {
-	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
+		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Ошибка демаршалирования: ", err)
 		return
 	}
 
@@ -121,76 +169,21 @@ func GETConversationsMessages(id string) {
 		if len(data.Messages) == 1 {
 			if msg.SingleSendMessage.Content.Type == "BOT_BLOCKED" || msg.SingleSendMessage.Content.Type == "BOT_UNBLOCKED" {
 				AddConversationTag(id)
-=======
-	result := romanCalculate(input)
-	if val, ok := result.(int); ok {
-		return arabicToRoman(val)
-	} else {
-		return result
-	}
-}
-
-func romanCalculate(input string) interface{} {
-	substrings := strings.Split(input, " ")
-	numberOne := roman[substrings[0]]
-	operator := substrings[1]
-	numberTwo := roman[substrings[2]]
-	if _, err := strconv.Atoi(substrings[0]); err != nil {
-		if _, err := strconv.Atoi(substrings[2]); err != nil {
-			switch operator {
-			case "+":
-				return numberOne + numberTwo
-			case "-":
-				if numberOne < numberTwo {
-					return "Вывод ошибки, так как в римской системе нет отрицательных чисел."
-				} else {
-					return numberOne - numberTwo
-				}
-			case "*":
-				return numberOne * numberTwo
-			case "/":
-				if numberOne < numberTwo {
-					return "Вывод ошибки, так как в римской системе нет значения ноль."
-				} else {
-					return numberOne / numberTwo
-				}
-			default:
-				return "Не понял что ты от меня хочешь, я такие данные не умею считать"
->>>>>>> fdfc0ad737b8413bd91d13335b59fbd93680ced1
 			}
 		}
 	}
-	return "Ошибка: оба числа должны быть в римской системе"
 }
 
-func arabicToRoman(arabic int) string {
-	romanMap := []struct {
-		arabic int
-		roman  string
-	}{
-		{100, "C"},
-		{90, "XC"},
-		{50, "L"},
-		{40, "XL"},
-		{10, "X"},
-		{9, "IX"},
-		{5, "V"},
-		{4, "IV"},
-		{1, "I"},
-	}
-	var roman string
+func AddConversationTag(id string) {
+	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id + "/tags"
 
-	for _, mapping := range romanMap {
-		for arabic >= mapping.arabic {
-			roman += mapping.roman
-			arabic -= mapping.arabic
-		}
+	requestTag := RequestTag{
+		TagName: GlobalTag,
 	}
-<<<<<<< HEAD
 
 	payload, err := json.Marshal(requestTag)
 	if err != nil {
-	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка при преобразовании в JSON: ", err)
+		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Ошибка при преобразовании в JSON: ", err)
 		return
 	}
 
@@ -219,7 +212,7 @@ func CancelConversation(id string, requestTag string) {
 	}
 	payload, err := json.Marshal(requestCancelConversation)
 	if err != nil {
-	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
+		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Ошибка демаршалирования: ", err)
 	}
 	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id
 	client := &http.Client{}
@@ -238,7 +231,7 @@ func CancelConversation(id string, requestTag string) {
 		return
 	}
 	defer res.Body.Close()
-	log.Println(" — " + color.GreenString("CLOSED") + " >>> "+"CONVERSATION: "+ id +" | TAG: " + requestTag)
+	log.Println(" — " + color.GreenString("CLOSED") + " >>> " + "CONVERSATION: " + id + " | TAG: " + requestTag)
 }
 
 func main() {
@@ -253,19 +246,10 @@ func main() {
 	GlobalInterval = os.Getenv("INTERVAL")
 	interval, err := strconv.Atoi(GlobalInterval)
 	if err != nil {
-		log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка преобразования строки в число: ", err)
+		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Ошибка преобразования строки в число: ", err)
 	}
-	
+
 	for range time.Tick(time.Second * time.Duration(interval)) {
 		GETConversations()
 	}
-=======
-	return roman
-}
-
-func main() {
-	fmt.Println("Привет, я калькулятор, давай посчитаем что нибудь!")
-	input := readInputFromConsole()
-	fmt.Println(input)
->>>>>>> fdfc0ad737b8413bd91d13335b59fbd93680ced1
 }
