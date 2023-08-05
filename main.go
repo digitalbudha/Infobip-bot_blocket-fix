@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -124,7 +125,7 @@ func GETConversations() {
 	var data Data
 	err = json.Unmarshal([]byte(body), &data)
 	if err != nil {
-		log.Println("Ошибка демаршалирования:", err)
+	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
 	}
 
 	for _, conv := range data.Conversations {
@@ -160,13 +161,13 @@ func GETConversationsMessages(id string) {
 	var data ConversationData
 	err = json.Unmarshal([]byte(body), &data)
 	if err != nil {
-		log.Println("Ошибка демаршалирования:", err)
+	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
 		return
 	}
 
 	for _, msg := range data.Messages {
 		if len(data.Messages) == 1 {
-			if msg.SingleSendMessage.Content.Type == "BOT_BLOCKED" {
+			if msg.SingleSendMessage.Content.Type == "BOT_BLOCKED" || msg.SingleSendMessage.Content.Type == "BOT_UNBLOCKED" {
 				AddConversationTag(id)
 			}
 		}
@@ -182,7 +183,7 @@ func AddConversationTag(id string) {
 
 	payload, err := json.Marshal(requestTag)
 	if err != nil {
-		log.Println("Ошибка при преобразовании в JSON:", err)
+	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка при преобразовании в JSON: ", err)
 		return
 	}
 
@@ -211,7 +212,7 @@ func CancelConversation(id string, requestTag string) {
 	}
 	payload, err := json.Marshal(requestCancelConversation)
 	if err != nil {
-		log.Println("Error marshalling: ", err)
+	log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
 	}
 	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id
 	client := &http.Client{}
@@ -230,10 +231,11 @@ func CancelConversation(id string, requestTag string) {
 		return
 	}
 	defer res.Body.Close()
-	log.Printf("Закрыл: %s c тегом: %s\n", id, requestTag)
+	log.Println(" — " + color.GreenString("CLOSED") + " >>> "+"CONVERSATION: "+ id +" | TAG: " + requestTag)
 }
 
 func main() {
+	log.Println(" — " + color.MagentaString("<<< SCRIPT RUN >>>"))
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Ошибка при загрузке файла .env:", err)
@@ -244,8 +246,9 @@ func main() {
 	GlobalInterval = os.Getenv("INTERVAL")
 	interval, err := strconv.Atoi(GlobalInterval)
 	if err != nil {
-		log.Println("Ошибка в преобразовании строки в число:", err)
+		log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка преобразования строки в число: ", err)
 	}
+	
 	for range time.Tick(time.Second * time.Duration(interval)) {
 		GETConversations()
 	}

@@ -7,3 +7,10 @@ AGENT_ID = "11111222222333334444" # ID агента с правами супер
 TAG = "Неинформативно" # Тег с которым будет закрываться обращение
 INTERVAL = 60 # В секундах
 ```
+#
+$Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build .\main.go
+
+#
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка преобразования строки в число ", err)
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка при преобразовании в JSON: ", err)
