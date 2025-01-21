@@ -1,24 +1,24 @@
-<h2>Скрипт ищет обращения с типом <b>bot_blocked</b> и закрывает их с тегом «Неинформативно»</h2>
+<h2>Script searches for tickets with type bot_blocked and closes them with the tag "Uninformative"</h2>
 
-<h3>Для запуска скрипта необходимо создать .env файл, в нем указать:</h3>
+<h3>To run the script, create a .env file and specify the following:</h3>
 
 ```Bash
-KEY = "Basic токен" # Получить можно на аккаунте infobip
-AGENT_ID = "11111222222333334444" # ID агента с правами супервайзера
-TAG = "Неинформативно" # Тег с которым будет закрываться обращение
-INTERVAL = 60 # В секундах
+KEY = "Basic token" # Can be obtained from the infobip account
+AGENT_ID = "11111222222333334444" # ID of the agent with supervisor rights
+TAG = "Uninformative" # Tag with which the ticket will be closed
+INTERVAL = 60 # In seconds
 ```
 
-<h3>Билдим из под windows</h3>
+<h3>Building on Windows</h3>
 
 ```Bash
 $Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build .\main.go
 ```
 
-<h3>Красим логи</h3>
+<h6>Coloring logs</h6>
 
 ```GO
-log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка преобразования строки в число ", err)
-log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка демаршалирования: ", err)
-log.Println(" — " + color.RedString("WARNING") + " >>> " + "Ошибка при преобразовании в JSON: ", err)
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Error converting string to number ", err)
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Unmarshalling error: ", err)
+log.Println(" — " + color.RedString("WARNING") + " >>> " + "Error converting to JSON: ", err)
 ```
