@@ -11,11 +11,10 @@ KEY="Basic token"          # Obtainable from the Infobip account
 AGENT_ID="11111222222333334444" # ID of the agent with supervisor rights
 TAG="Uninformative"        # Tag with which the ticket will be closed
 INTERVAL=60                # Interval in seconds
+URL="https://your_server.api.infobip.com/ccaas/1/conversations" # URL of the Infobip server
 ```
 
-## Building the Project
-
-### Building on Windows
+## Building the Project (Windows)
 
 To build the project for Linux on a Windows machine, use the following command:
 
@@ -42,7 +41,7 @@ The project is organized into several packages to improve maintainability:
 - **internal/tags**: Manages tagging and closing of conversations.
 - **internal/models**: Contains data models used across the application.
 
-## Logging
+## Logging 
 
 The script uses colored logs to indicate different types of messages. Examples include:
 
