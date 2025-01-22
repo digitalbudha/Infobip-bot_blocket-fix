@@ -21,7 +21,7 @@ type RequestCancelConversation struct {
 }
 
 func AddConversationTag(id string, globalKey string) {
-	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id + "/tags"
+	url := config.GlobalURL + "/" + id + "/tags"
 
 	requestTag := RequestTag{
 		TagName: config.GlobalTag,
@@ -52,6 +52,8 @@ func AddConversationTag(id string, globalKey string) {
 }
 
 func CancelConversation(id string, requestTag string, globalKey string) {
+	url := config.GlobalURL + "/" + id
+
 	requestCancelConversation := RequestCancelConversation{
 		Status:  "CLOSED",
 		AgentID: config.GlobalAgentId,
@@ -60,7 +62,6 @@ func CancelConversation(id string, requestTag string, globalKey string) {
 	if err != nil {
 		log.Println(" — "+color.RedString("WARNING")+" >>> "+"Unmarshalling error: ", err)
 	}
-	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations/" + id
 	client := &http.Client{}
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(payload))
 

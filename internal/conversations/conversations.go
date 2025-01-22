@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"DeleteBotBlocked/internal/config"
 	"DeleteBotBlocked/internal/messages"
 	"DeleteBotBlocked/internal/models"
 
@@ -18,7 +19,7 @@ type Data struct {
 }
 
 func GETConversations(globalKey string) {
-	url := "https://dm9epl.api.infobip.com/ccaas/1/conversations?status=OPEN&limit=999"
+	url := config.GlobalURL + "?status=OPEN&limit=999"
 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
