@@ -30,6 +30,52 @@ After building, you can run the script using:
 ./bot_blocked_handler
 ```
 
+## Running with Docker Compose
+
+To run the binary in a Docker container using Docker Compose, follow these steps:
+
+1. **Create a Dockerfile** in the root directory:
+
+    ```dockerfile
+    FROM golang:alpine
+
+    WORKDIR /app
+
+    COPY bot_blocked_handler /app/bot_blocked_handler
+    COPY .env /app/.env
+
+    CMD ["./bot_blocked_handler"]
+    ```
+
+2. **Create a `docker-compose.yml` file** in the root directory:
+
+    ```yaml
+    version: '3.8'
+
+    services:
+      bot_handler:
+        build: .
+        container_name: bot_blocked_handler
+        restart: unless-stopped
+        environment:
+          - KEY=${KEY}
+          - AGENT_ID=${AGENT_ID}
+          - TAG=${TAG}
+          - INTERVAL=${INTERVAL}
+          - URL=${URL}
+    ```
+
+3. **Deploy the container** on your server:
+
+    - Ensure Docker and Docker Compose are installed on your server.
+    - Run the following command to start the service:
+
+    ```bash
+    docker-compose up -d
+    ```
+
+    This command will build the Docker image and start the container in detached mode.
+
 ## Code Structure
 
 The project is organized into several packages to improve maintainability:
